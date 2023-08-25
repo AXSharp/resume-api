@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify
 from flask_mysqldb import MySQL
 from settings import MYSQL_DB, MYSQL_HOST, MYSQL_PASSWORD, MYSQL_USER
-
+import json
 
 app = Flask(__name__)
 
@@ -36,14 +36,21 @@ def create_comment():
         "code": 201,
         "message": "Comment has been added to database!"
     }
-    data = request.get_json()
-    email= data['email']
-    comment = data['comment']
-    cursor = mysql.connection.cursor()
-    cursor.execute('''INSERT INTO resume_website.comments (email, comments) VALUES(%s,%s);''', (email, comment))
-    mysql.connection.commit()
-    cursor.close()
-    return jsonify(response), 201
+    
+    email= request.json.get("email", None)
+    comment = request.json.get("comment", None)
+    if email is None or comment is None:
+        response = {
+            "code": 400,
+            "message": "Keys 'email' or 'comment' were not provided!"
+        }
+        return jsonify (response), 400
+    else:
+        cursor = mysql.connection.cursor()
+        cursor.execute('''INSERT INTO resume_website.comments (email, comments) VALUES(%s,%s);''', (email, comment))
+        mysql.connection.commit()
+        cursor.close()
+        return jsonify(response), 201
 
 if __name__ == "__main__":
     app.run(debug=True)
