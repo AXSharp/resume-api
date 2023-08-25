@@ -1,13 +1,14 @@
 from flask import Flask, request, jsonify
 from flask_mysqldb import MySQL
-import json
+from settings import MYSQL_DB, MYSQL_HOST, MYSQL_PASSWORD, MYSQL_USER
+
 
 app = Flask(__name__)
 
-app.config['MYSQL_HOST'] = '127.0.0.1'
-app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = '---'
-app.config['MYSQL_DB'] = 'resume_website'
+app.config['MYSQL_HOST'] = MYSQL_HOST
+app.config['MYSQL_USER'] = MYSQL_USER
+app.config['MYSQL_PASSWORD'] = MYSQL_PASSWORD
+app.config['MYSQL_DB'] = MYSQL_DB
 
 mysql = MySQL(app)
 
