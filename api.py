@@ -30,7 +30,6 @@ def get_comment(email):
     return jsonify (response), 200
 
 @app.route("/create-comment", methods = ["POST"])
-
 def create_comment():
     response = {
         "code": 201,
@@ -51,6 +50,20 @@ def create_comment():
         mysql.connection.commit()
         cursor.close()
         return jsonify(response), 201
+
+@app.route("/delete-comment/<id>", methods = ["DELETE"])
+def delete_comment(id):
+    cursor = mysql.connection.cursor()
+    cursor.execute('''DELETE FROM resume_website.comments WHERE id=%s;''', [id])
+    mysql.connection.commit()
+    cursor.close()
+    response = {
+        "code": 200,
+        "message": "Comment has been deleted!"
+    }
+    return jsonify(response), 200
+
+
 
 if __name__ == "__main__":
     app.run(debug=True)
