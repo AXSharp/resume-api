@@ -87,7 +87,7 @@ def create_comment():
         url = TOKEN_URL + apiKey
         token = requests.get(url)
         token = token.json()
-        if token['message']['valid'] and token['message']['getPerm'] == 1: 
+        if token['message']['valid'] and token['message']['postPerm'] == 1: 
             response = {
                 "code": 201,
                 "message": "Comment has been added to database!"
@@ -125,7 +125,7 @@ def delete_comment(id):
         url = TOKEN_URL + apiKey
         token = requests.get(url)
         token = token.json()
-        if token['message']['valid'] and token['message']['getPerm'] == 1:
+        if token['message']['valid'] and token['message']['deletePerm'] == 1:
             cursor = mysql.connection.cursor()
             cursor.execute(DELETE_COMMENT_QUERY, [id])
             mysql.connection.commit()
