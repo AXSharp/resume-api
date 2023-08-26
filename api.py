@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
 from flask_mysqldb import MySQL
-from settings import MYSQL_DB, MYSQL_HOST, MYSQL_PASSWORD, MYSQL_USER
+from settings import MYSQL_DB, MYSQL_HOST, MYSQL_PASSWORD, MYSQL_USER, TOKEN_QUERY
 import json
 
 app = Flask(__name__)
@@ -11,6 +11,35 @@ app.config['MYSQL_PASSWORD'] = MYSQL_PASSWORD
 app.config['MYSQL_DB'] = MYSQL_DB
 
 mysql = MySQL(app)
+
+@app.route("/token/<token>")
+
+def validate_token(token):
+    cursor = mysql.connection.cursor()
+    cursor.execute(TOKEN_QUERY, [token])
+    user_data = cursor.fetchall()
+    mysql.connection.commit()
+    cursor.close()
+    if not user_data:
+        response = {
+            "code": 200,
+            "message": {
+                "valid": False,
+                "error": "Invalid api key!"
+            }
+        } 
+        return jsonify(response), 200
+    user_data = user_data[0]
+    response = {
+        "code": 200,
+        "message": {
+            "valid": True,
+            "getPerm": user_data[2],
+            "postPerm": user_data[3],
+            "deletePerm": user_data[4]    
+        } 
+    }
+    return jsonify(response), 200
 
 @app.route("/get-comment/<email>")
 def get_comment(email):
