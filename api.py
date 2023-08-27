@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
 from flask_mysqldb import MySQL
-from settings import MYSQL_DB, MYSQL_HOST, MYSQL_PASSWORD, MYSQL_USER, TOKEN_QUERY, GET_COMMENT_QUERY, POST_COMMENT_QUERY, DELETE_COMMENT_QUERY, TOKEN_URL
+from settings import *
 import requests
 
 app = Flask(__name__)
@@ -16,7 +16,7 @@ mysql = MySQL(app)
 
 def validate_token(token):
     cursor = mysql.connection.cursor()
-    cursor.execute(TOKEN_QUERY, [token])
+    cursor.execute('''SELECT * FROM resume_website.api_keys WHERE apiKey = %s''', [token])
     user_data = cursor.fetchall()
     mysql.connection.commit()
     cursor.close()
@@ -40,8 +40,40 @@ def validate_token(token):
         } 
     }
     return jsonify(response), 200
+@app.route("/get-comments")
+def get_all_comments():
+    apiKey = request.headers.get('apiKey', None)
+    if apiKey is not None:    
+        url = TOKEN_URL + apiKey
+        token = requests.get(url)
+        token = token.json()
+        if token['message']['valid'] and token['message']['getPerm'] == 1: 
+            cursor = mysql.connection.cursor()
+            cursor.execute( GET_ALL_COMMENTS_QUERY)
+            user_data = cursor.fetchall()
+            transformed_data = [{'email': row[1], 'comment': row[2]} for row in user_data]
+            
+            response = {
+                "code": 200,
+                "message": transformed_data
+            }
+            return jsonify(response), 200
+        
+        
+        
+        response = {
+            "code": 400,
+            "message": "Invalid API key!"
+        }
+        return jsonify(response), 400
+    
+    response = {
+            "code": 400,
+            "message": "API key required!"
+        }
+    return jsonify(response), 400
 
-@app.route("/get-comment/<email>")
+@app.route("/get-comments/<email>")
 def get_comment(email):
     apiKey = request.headers.get('apiKey', None)
     if apiKey is not None:    
