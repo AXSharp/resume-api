@@ -1,9 +1,11 @@
 from flask import Flask, request, jsonify
 from flask_mysqldb import MySQL
+from flask_cors import CORS
 from settings import *
 import requests
 
 app = Flask(__name__)
+CORS(app)
 
 app.config['MYSQL_HOST'] = MYSQL_HOST
 app.config['MYSQL_USER'] = MYSQL_USER
@@ -39,6 +41,7 @@ def validate_token(token):
             "deletePerm": user_data[4]    
         } 
     }
+    print("Validation successful!")
     return jsonify(response), 200
 @app.route("/get-comments")
 def get_all_comments():
@@ -60,7 +63,7 @@ def get_all_comments():
             return jsonify(response), 200
         
         
-        
+        print("Validation failed!")
         response = {
             "code": 400,
             "message": "Invalid API key!"
